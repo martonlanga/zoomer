@@ -1,4 +1,5 @@
 import * as fsScandir from '@nodelib/fs.scandir'
+import fs from 'fs'
 import { exec } from 'child_process'
 import {
   app,
@@ -11,6 +12,8 @@ import prepareNext from 'electron-next'
 import createWindow from './create-window'
 import { Command, FileEntry, InputCommand } from './interfaces'
 import createPty from './pty'
+import langDetector from 'language-detect'
+import langMapper from 'language-map'
 
 let terminalWindow: BrowserWindow | null = null
 
@@ -64,4 +67,31 @@ ipcMain.on('ls', (event: IpcMainEvent, currentDir: string) => {
     }))
 
   event.returnValue = files
+})
+
+ipcMain.on('readFile', (event: IpcMainEvent, path: string) => {
+  try {
+    const content = fs.readFileSync(path, { encoding: 'utf-8' })
+
+    event.returnValue = content
+  } catch (e) {
+    event.returnValue = null
+  }
+})
+
+ipcMain.on(
+  'writeFile',
+  (event: IpcMainEvent, path: string, content: string) => {
+    console.log('writing', path, content)
+
+    fs.writeFileSync(path, content)
+  },
+)
+
+ipcMain.on('getLanguage', (event: IpcMainEvent, path: string) => {
+  try {
+    event.returnValue = langMapper[langDetector.sync(path)].aceMode
+  } catch (e) {
+    event.returnValue = undefined
+  }
 })

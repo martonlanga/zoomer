@@ -13,7 +13,7 @@ import useStore from '../../store'
  * If yes, continue writing to xterm, until stream is over
  */
 
-const CUSTOM_COMMANDS: CUSTOM_COMMAND[] = ['ls']
+const CUSTOM_COMMANDS: CUSTOM_COMMAND[] = ['ls', 'edit']
 
 interface Props {
   currentDir: string
@@ -26,7 +26,7 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
     () => withSyntaxHighlighting(withReact(createEditor())),
     [],
   )
-
+  const [isFocused, setIsFocused] = useState(true)
   const [value, setValue] = useState<Node[]>([
     {
       type: 'paragraph',
@@ -54,11 +54,16 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
   useKey('Enter', enter, {}, [value])
 
   return (
-    <div id="input" className="px-8 py-3 focus:outline-none w-full">
+    <div
+      id="input"
+      className="px-8 py-3 focus:outline-none w-full"
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+    >
       <Slate
         editor={editor}
         value={value}
-        onChange={newValue => setValue(newValue)}
+        onChange={newValue => isFocused && setValue(newValue)}
       >
         <Editable
           autoFocus

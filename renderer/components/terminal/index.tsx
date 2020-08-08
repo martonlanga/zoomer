@@ -3,7 +3,7 @@ import ipc from '../../lib/ipc'
 import useStore from '../../store'
 import Input from './input'
 
-const getEditor = (): HTMLDivElement | null => {
+const getInput = (): HTMLDivElement | null => {
   const input = document.querySelector<HTMLDivElement>('#input')
   if (input && input.children[0]) {
     return input.childNodes[0] as HTMLDivElement
@@ -44,9 +44,9 @@ const Terminal = () => {
   }, [])
 
   useEffect(() => {
-    const editor = getEditor()
-    if (editor) {
-      editor.scrollIntoView({ behavior: 'smooth' })
+    const input = getInput()
+    if (input) {
+      input.scrollIntoView({ behavior: 'smooth' })
     }
     console.log('history', history)
   }, [history])
@@ -55,10 +55,10 @@ const Terminal = () => {
     <div
       className="overflow-x-hidden text-white h-screen flex flex-col bg-black"
       onClick={() => {
-        const editor = getEditor()
-        if (editor) {
-          editor.focus()
-        }
+        const input = getInput()
+        // if (input) {
+        //   input.focus()
+        // }
       }}
     >
       <ul className="px-8 py-3">
@@ -71,7 +71,7 @@ const Terminal = () => {
             {out && type === 'fallback' ? (
               <div id={`term-${id}`} />
             ) : (
-              <div className="text-gray-500">{out}</div>
+              <section className="text-gray-500">{out}</section>
             )}
           </li>
         ))}

@@ -1,4 +1,6 @@
+import { PortalWithState } from 'react-portal'
 import { Command } from '../../electron-src/interfaces'
+import Edit from '../components/custom/edit'
 import Ls from '../components/custom/ls'
 import ipc from './ipc'
 
@@ -13,6 +15,15 @@ const resolveOutput = (inputCommand: Omit<Command, 'out'>): Command => {
     switch (command) {
       case 'ls':
         out = <Ls currentDir={inputCommand.currentDir} />
+        break
+      case 'edit':
+        const path =
+          inputCommand.currentDir + '/' + inputCommand.input.split(' ')[1]
+        out = (
+          <PortalWithState defaultOpen>
+            {props => <Edit {...props} path={path} />}
+          </PortalWithState>
+        )
         break
       default:
         out = 'No custom component found for ' + command
