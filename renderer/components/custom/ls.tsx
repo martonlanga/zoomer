@@ -11,7 +11,6 @@ const Ls = ({ currentDir }: Props) => {
   const firstTabRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (firstTabRef.current) {
-      console.log(firstTabRef.current)
       firstTabRef.current.focus()
     }
   }, [])
@@ -71,7 +70,7 @@ const Tab = React.forwardRef<
         }}
         onBlur={() => setFocused(false)}
         tabIndex={0}
-        className="border border-gray-500 focus:outline-none focus:border-gray-200 w-48 p-1 overflow-y-auto"
+        className="border border-gray-700 focus:outline-none focus:border-gray-200 w-48 p-1 overflow-y-auto"
         style={{ maxHeight: '15rem' }}
       >
         {files.map((file, i) => (

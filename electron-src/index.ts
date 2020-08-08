@@ -31,15 +31,14 @@ app.on('window-all-closed', () => {
   // if (process.platform !== 'darwin') app.quit()
 })
 
-const pty = createPty()
-pty.onData(function (data) {
-  if (terminalWindow) {
-    terminalWindow.webContents.send('data', data)
-  }
-})
-
 ipcMain.on('pty', (event: IpcMainEvent, inputCommand: InputCommand) => {
   console.log('pty', inputCommand)
+  const pty = createPty(inputCommand.currentDir)
+  pty.onData(function (data) {
+    if (terminalWindow) {
+      terminalWindow.webContents.send('data', data)
+    }
+  })
   pty.write(`${inputCommand.input}\r`)
 })
 

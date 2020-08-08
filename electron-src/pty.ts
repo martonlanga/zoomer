@@ -3,7 +3,7 @@ import defaultShell from 'default-shell'
 
 const defaultShellArgs = ['--login']
 
-const createPty = () => {
+const createPty = (cwd = process.env.HOME) => {
   let spawn: typeof npSpawn
   try {
     spawn = require('node-pty').spawn
@@ -17,7 +17,7 @@ const createPty = () => {
     name: 'xterm-color',
     cols: 80,
     rows: 30,
-    cwd: process.env.HOME,
+    cwd: cwd,
     env: process.env as NodeJS.ProcessEnv,
   })
   return ptyProcess
