@@ -17,18 +17,6 @@ const Terminal = () => {
     '/Users/martonlanga/code/extensions/countdown',
   )
 
-  // useKey('ArrowUp', () => setSelected(selected > 0 ? selected - 1 : last), {}, [
-  //   selected,
-  //   results,
-  //   last,
-  // ])
-  // useKey(
-  //   'ArrowDown',
-  //   () => setSelected(selected < results.length - 1 ? selected + 1 : 0),
-  //   {},
-  //   [selected, results],
-  // )
-
   useEffect(() => {
     const cmds = ipc.sendSync('getCommands')
     // console.log(cmds.split(/\s+/))

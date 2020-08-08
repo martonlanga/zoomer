@@ -41,7 +41,6 @@ const Tab = React.forwardRef<
 
   const focusNext = () => {
     if (focused && selected?.isDir && nextTabRef.current) {
-      console.log('next')
       nextTabRef.current.focus()
     }
   }

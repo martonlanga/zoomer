@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useKey } from 'react-use'
 import { createEditor, Editor, Node, Range, Text, Transforms } from 'slate'
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
@@ -21,12 +21,13 @@ interface Props {
 }
 
 const Input = ({ currentDir, setCurrentDir }: Props) => {
-  const add = useStore(state => state.add)
+  const { add, history } = useStore()
   const editor = useMemo(
     () => withSyntaxHighlighting(withReact(createEditor())),
     [],
   )
   const [isFocused, setIsFocused] = useState(true)
+  const [historyIndex, setHistoryIndex] = useState(history.length)
   const [value, setValue] = useState<Node[]>([
     {
       type: 'paragraph',
@@ -34,11 +35,38 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
     },
   ])
 
+  useEffect(() => {
+    if (historyIndex > -1 && history[historyIndex]) {
+      setValue([
+        {
+          type: 'paragraph',
+          children: [{ text: history[historyIndex].input }],
+        },
+      ])
+    }
+  }, [historyIndex, history])
+
+  useKey(
+    'ArrowUp',
+    () => historyIndex > 0 && setHistoryIndex(historyIndex - 1),
+    {},
+    [historyIndex, history],
+  )
+  useKey(
+    'ArrowDown',
+    () =>
+      historyIndex < history.length - 1 && setHistoryIndex(historyIndex + 1),
+    {},
+    [historyIndex, history],
+  )
+
   const renderLeaf = useCallback(props => {
     return <Leaf {...props} />
   }, [])
 
   const enter = () => {
+    setHistoryIndex(history.length + 1)
+
     const input = value.map(n => Node.string(n)).join('\n')
     if (!input) return
     const Command = { id: uuidv4(), input, currentDir }
@@ -51,7 +79,6 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
     Editor.deleteBackward(editor, { unit: 'line' })
     ReactEditor.focus(editor)
   }
-  useKey('Enter', enter, {}, [value])
 
   return (
     <div
@@ -63,7 +90,11 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
       <Slate
         editor={editor}
         value={value}
-        onChange={newValue => isFocused && setValue(newValue)}
+        onChange={newValue => {
+          if (isFocused) {
+            setValue(newValue)
+          }
+        }}
       >
         <Editable
           autoFocus
@@ -73,6 +104,7 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
           onKeyDown={event => {
             if (event.key === 'Enter') {
               event.preventDefault()
+              enter()
             }
           }}
         />
