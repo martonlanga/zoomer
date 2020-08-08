@@ -1,15 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import ipc from '../../lib/ipc'
 import useStore from '../../store'
-import Input from './input'
-
-const getInput = (): HTMLDivElement | null => {
-  const input = document.querySelector<HTMLDivElement>('#input')
-  if (input && input.children[0]) {
-    return input.childNodes[0] as HTMLDivElement
-  }
-  return null
-}
+import Input, { getInput } from './input'
 
 const Terminal = () => {
   const { history, termOutput } = useStore()

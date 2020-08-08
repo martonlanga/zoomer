@@ -6,12 +6,13 @@ import { v4 as uuidv4 } from 'uuid'
 import { CUSTOM_COMMAND } from '../../../electron-src/interfaces'
 import useStore from '../../store'
 
-/**
- * Streaming data
- *
- * Check if message's id is the same as the previous
- * If yes, continue writing to xterm, until stream is over
- */
+export const getInput = (): HTMLDivElement | null => {
+  const input = document.querySelector<HTMLDivElement>('#input')
+  if (input && input.children[0]) {
+    return input.childNodes[0] as HTMLDivElement
+  }
+  return null
+}
 
 const CUSTOM_COMMANDS: CUSTOM_COMMAND[] = ['ls', 'edit']
 
@@ -78,6 +79,7 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
 
     Editor.deleteBackward(editor, { unit: 'line' })
     ReactEditor.focus(editor)
+    getInput()?.focus()
   }
 
   return (
