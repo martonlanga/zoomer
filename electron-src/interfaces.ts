@@ -10,7 +10,7 @@ export interface Command {
 
 export type InputCommand = Omit<Command, 'out'>
 
-export type CUSTOM_COMMAND = 'ls' | 'edit'
+export type CUSTOM_COMMAND = 'ls' | 'edit' | 'iframe'
 
 export interface FileEntry {
   name: string

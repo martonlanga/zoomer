@@ -29,14 +29,7 @@ const Edit = ({
     {},
     [path, valueGetter],
   )
-  useKey(
-    'Escape',
-    () => {
-      closePortal()
-    },
-    {},
-    [closePortal],
-  )
+  useKey('Escape', closePortal, {}, [closePortal])
 
   return isOpen
     ? portal(

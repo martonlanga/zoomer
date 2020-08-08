@@ -2,6 +2,7 @@ import { PortalWithState } from 'react-portal'
 import { Command } from '../../electron-src/interfaces'
 import Edit from '../components/custom/edit'
 import Ls from '../components/custom/ls'
+import Iframe from '../components/custom/iframe'
 import ipc from './ipc'
 
 const resolveOutput = (inputCommand: Omit<Command, 'out'>): Command => {
@@ -24,6 +25,9 @@ const resolveOutput = (inputCommand: Omit<Command, 'out'>): Command => {
             {props => <Edit {...props} path={path} />}
           </PortalWithState>
         )
+        break
+      case 'iframe':
+        out = <Iframe src={inputCommand.input.split(' ')[1]} />
         break
       default:
         out = 'No custom component found for ' + command

@@ -25,9 +25,9 @@ export const getInput = (): HTMLDivElement | null => {
   return null
 }
 
-const COMMANDS = getCommands()
+const CUSTOM_COMMANDS: CUSTOM_COMMAND[] = ['ls', 'edit', 'iframe']
 
-const CUSTOM_COMMANDS: CUSTOM_COMMAND[] = ['ls', 'edit']
+const COMMANDS = [...getCommands(), ...CUSTOM_COMMANDS]
 
 interface Props {
   currentDir: string
