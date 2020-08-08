@@ -1,0 +1,55 @@
+{
+  "name": "zoomer-shell",
+  "productName": "Zoomer",
+  "version": "1.0.0",
+  "main": "main/index.js",
+  "scripts": {
+    "clean": "rimraf dist main renderer/out renderer/.next node_modules",
+    "start": "electron main",
+    "dev": "tsc -p electron-src && yarn start",
+    "build:renderer": "next build renderer && next export renderer",
+    "build:electron": "tsc -p electron-src",
+    "build": "yarn build:electron && yarn build:renderer",
+    "pack-app": "yarn build && electron-builder --dir",
+    "dist": "yarn build && electron-builder",
+    "type-check": "tsc",
+    "postinstall": "electron-rebuild -f -w node-pty"
+  },
+  "build": {
+    "asar": true,
+    "files": [
+      "main",
+      "renderer/out"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.21",
+    "@types/react": "^16.9.17",
+    "@types/react-dom": "^16.9.4",
+    "electron": "^9.1.0",
+    "electron-builder": "^21.2.0",
+    "electron-rebuild": "^1.11.0",
+    "next": "latest",
+    "rimraf": "^3.0.2",
+    "@types/uuid": "^8.0.1",
+    "typescript": "^3.7.4"
+  },
+  "dependencies": {
+    "@nodelib/fs.scandir": "^2.1.3",
+    "default-shell": "^1.0.1",
+    "electron-is-dev": "^1.1.0",
+    "electron-next": "^3.1.5",
+    "electron-store": "^6.0.0",
+    "node-pty": "^0.9.0",
+    "postcss-preset-env": "^6.7.0",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-use": "^15.3.3",
+    "slate": "^0.58.4",
+    "slate-react": "^0.58.4",
+    "tailwindcss": "^1.5.1",
+    "uuid": "^8.3.0",
+    "xterm": "^4.8.1",
+    "zustand": "^2.2.3"
+  }
+}

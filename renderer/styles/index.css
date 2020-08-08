@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply overflow-hidden bg-transparent;
+}
+
+::selection {
+  background: #db4b7d80;
+}
