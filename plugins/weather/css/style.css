@@ -1,0 +1,176 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: "Yantramanav", sans-serif;
+}
+
+.main {
+  height: 100%;
+  width: 100%;
+  margin: auto;
+  display: table;
+  top: 0;
+}
+
+.main .inner {
+  display: table-cell;
+  vertical-align: middle;
+  width: 100%;
+  max-width: none;
+}
+
+.weather {
+  max-width: 1500px;
+  margin: 0 auto;
+  text-align: center;
+  padding-bottom: 15%;
+}
+
+.footer {
+  margin: 0 auto;
+  position: absolute;
+  text-align: center;
+  bottom: 5%;
+  width: 100%;
+  height: 60px;
+}
+
+.weather h2 {
+  font-size: 500%;
+}
+
+.weather h1 {
+  padding-top: 25px;
+  font-size: 700%
+}
+
+.weather canvas {
+  padding-top: 25px;
+}
+
+.disable-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+#temperature {
+  -webkit-animation-duration: 0.3s;
+}
+
+/* Slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 17px;
+  padding: 0;
+  margin: 0;
+  margin-bottom: -3px;
+}
+
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 13px;
+  width: 13px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(13px);
+  -ms-transform: translateX(13px);
+  transform: translateX(13px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 17px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+
+/*--- Media Queries --*/
+@media screen and (max-width: 1600px) {
+  .weather h2 {
+    font-size: 625%;
+  }
+
+  .weather h1 {
+    font-size: 825%
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .weather h2 {
+    font-size: 575%;
+  }
+
+  .weather h1 {
+    font-size: 775%
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .weather h2 {
+    font-size: 500%;
+  }
+
+  .weather h1 {
+    font-size: 700%
+  }
+}
+
+
+@media screen and (max-width: 768px) {
+  .weather h2 {
+    font-size: 400%;
+  }
+
+  .weather h1 {
+    font-size: 600%
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .weather h2 {
+    font-size: 250%;
+  }
+
+  .weather h1 {
+    font-size: 550%
+  }
+}

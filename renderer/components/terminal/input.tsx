@@ -16,6 +16,7 @@ import { CUSTOM_COMMAND } from '../../../electron-src/interfaces'
 import useStore from '../../store'
 import { getCommands } from '../../lib'
 import { withHistory } from 'slate-history'
+import PLUGINS from '../../lib/plugins'
 
 export const getInput = (): HTMLDivElement | null => {
   const input = document.querySelector<HTMLDivElement>('#input')
@@ -25,9 +26,11 @@ export const getInput = (): HTMLDivElement | null => {
   return null
 }
 
+const PLUGIN_NAMES = PLUGINS.map(({ name }) => name)
+
 const CUSTOM_COMMANDS: CUSTOM_COMMAND[] = ['ls', 'edit', 'iframe']
 
-const COMMANDS = [...getCommands(), ...CUSTOM_COMMANDS]
+const COMMANDS = [...getCommands(), ...CUSTOM_COMMANDS, ...PLUGIN_NAMES]
 
 interface Props {
   currentDir: string
@@ -117,7 +120,14 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
           const input = value.map(n => Node.string(n)).join('\n')
           if (!input) return
           const command = { id: uuidv4(), input, currentDir }
-          if (CUSTOM_COMMANDS.includes(input.split(' ')[0] as CUSTOM_COMMAND)) {
+          const cmd = input.split(' ')[0]
+          if (PLUGIN_NAMES.includes(cmd)) {
+            const plugin = PLUGINS.find(plugin => plugin.name === cmd)
+            if (plugin) {
+              command.input = 'iframe ' + plugin.src
+              add({ ...command, type: 'custom' })
+            }
+          } else if (CUSTOM_COMMANDS.includes(cmd as CUSTOM_COMMAND)) {
             add({ ...command, type: 'custom' })
           } else {
             add({ ...command, type: 'fallback' })

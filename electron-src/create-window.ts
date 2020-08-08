@@ -17,6 +17,7 @@ const createWindow = () => {
       preload: join(__dirname, 'preload.js'),
       backgroundThrottling: false,
       spellcheck: false,
+      webSecurity: false, // todo: fix iframe not allowed to load a different way
     },
   })
 
