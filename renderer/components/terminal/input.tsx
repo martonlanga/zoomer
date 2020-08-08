@@ -1,10 +1,21 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
+import { Portal } from 'react-portal'
 import { useKey } from 'react-use'
 import { createEditor, Editor, Node, Range, Text, Transforms } from 'slate'
-import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
+import {
+  Editable,
+  ReactEditor,
+  Slate,
+  withReact,
+  useSelected,
+  useFocused,
+  RenderElementProps,
+} from 'slate-react'
 import { v4 as uuidv4 } from 'uuid'
 import { CUSTOM_COMMAND } from '../../../electron-src/interfaces'
 import useStore from '../../store'
+import { getCommands } from '../../lib'
+import { withHistory } from 'slate-history'
 
 export const getInput = (): HTMLDivElement | null => {
   const input = document.querySelector<HTMLDivElement>('#input')
@@ -13,6 +24,8 @@ export const getInput = (): HTMLDivElement | null => {
   }
   return null
 }
+
+const COMMANDS = getCommands()
 
 const CUSTOM_COMMANDS: CUSTOM_COMMAND[] = ['ls', 'edit']
 
@@ -23,10 +36,7 @@ interface Props {
 
 const Input = ({ currentDir, setCurrentDir }: Props) => {
   const { add, history } = useStore()
-  const editor = useMemo(
-    () => withSyntaxHighlighting(withReact(createEditor())),
-    [],
-  )
+  const editor = useMemo(() => withSuggestions(withReact(createEditor())), [])
   const [isFocused, setIsFocused] = useState(true)
   const [historyIndex, setHistoryIndex] = useState(history.length)
   const [value, setValue] = useState<Node[]>([
@@ -38,12 +48,12 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
 
   useEffect(() => {
     if (historyIndex > -1 && history[historyIndex]) {
-      setValue([
-        {
-          type: 'paragraph',
-          children: [{ text: history[historyIndex].input }],
-        },
-      ])
+      // setValue([
+      //   {
+      //     type: 'paragraph',
+      //     children: [{ text: history[historyIndex].input }],
+      //   },
+      // ])
     }
   }, [historyIndex, history])
 
@@ -61,31 +71,81 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
     [historyIndex, history],
   )
 
-  const renderLeaf = useCallback(props => {
-    return <Leaf {...props} />
-  }, [])
+  const [target, setTarget] = useState<null | Range>(null)
+  const [index, setIndex] = useState(0)
+  const [search, setSearch] = useState('')
+  const suggestionRef = useRef<HTMLDivElement>(null)
+  const renderElement = useCallback(props => <Element {...props} />, [])
 
-  const enter = () => {
-    setHistoryIndex(history.length + 1)
+  const chars = [
+    ...new Set(
+      COMMANDS.filter(c => c.toLowerCase().startsWith(search.toLowerCase()))
+        .sort((a, b) => a.length - b.length)
+        .slice(0, 10),
+    ),
+  ]
 
-    const input = value.map(n => Node.string(n)).join('\n')
-    if (!input) return
-    const Command = { id: uuidv4(), input, currentDir }
-    if (CUSTOM_COMMANDS.includes(input.split(' ')[0] as CUSTOM_COMMAND)) {
-      add({ ...Command, type: 'custom' })
-    } else {
-      add({ ...Command, type: 'fallback' })
+  const onKeyDown = useCallback(
+    event => {
+      if (target) {
+        switch (event.key) {
+          case 'ArrowDown':
+            event.preventDefault()
+            const prevIndex = index >= chars.length - 1 ? 0 : index + 1
+            setIndex(prevIndex)
+            break
+          case 'ArrowUp':
+            event.preventDefault()
+            const nextIndex = index <= 0 ? chars.length - 1 : index - 1
+            setIndex(nextIndex)
+            break
+          case 'Tab':
+          case 'Enter':
+            event.preventDefault()
+            Transforms.select(editor, target)
+            insertSuggestion(editor, chars[index])
+            setTarget(null)
+            break
+          case 'Escape':
+            event.preventDefault()
+            setTarget(null)
+            break
+        }
+      } else {
+        if (event.key === 'Enter') {
+          event.preventDefault()
+          const input = value.map(n => Node.string(n)).join('\n')
+          if (!input) return
+          const command = { id: uuidv4(), input, currentDir }
+          if (CUSTOM_COMMANDS.includes(input.split(' ')[0] as CUSTOM_COMMAND)) {
+            add({ ...command, type: 'custom' })
+          } else {
+            add({ ...command, type: 'fallback' })
+          }
+
+          Editor.deleteBackward(editor, { unit: 'line' })
+          ReactEditor.focus(editor)
+          getInput()?.focus()
+        }
+      }
+    },
+    [index, search, target, value, CUSTOM_COMMANDS, currentDir, editor],
+  )
+
+  useEffect(() => {
+    if (target && chars.length > 0 && suggestionRef.current) {
+      const el = suggestionRef.current
+      const domRange = ReactEditor.toDOMRange(editor, target)
+      const rect = domRange.getBoundingClientRect()
+      el.style.top = `${rect.top + window.pageYOffset + 24}px`
+      el.style.left = `${rect.left + window.pageXOffset}px`
     }
-
-    Editor.deleteBackward(editor, { unit: 'line' })
-    ReactEditor.focus(editor)
-    getInput()?.focus()
-  }
+  }, [chars.length, editor, index, search, target])
 
   return (
     <div
       id="input"
-      className="px-8 py-3 focus:outline-none w-full h-full"
+      className="px-8 py-4 focus:outline-none w-full h-full border-t border-gray-800"
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
     >
@@ -96,70 +156,113 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
           if (isFocused) {
             setValue(newValue)
           }
+
+          const { selection } = editor
+
+          if (selection && Range.isCollapsed(selection)) {
+            const [start] = Range.edges(selection)
+            const wordBefore = Editor.before(editor, start, { unit: 'word' })
+            const before = wordBefore && Editor.before(editor, wordBefore)
+            const beforeRange = before && Editor.range(editor, before, start)
+            const beforeText = beforeRange && Editor.string(editor, beforeRange)
+            const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/)
+            const after = Editor.after(editor, start)
+            const afterRange = Editor.range(editor, start, after)
+            const afterText = Editor.string(editor, afterRange)
+            const afterMatch = afterText.match(/^(\s|$)/)
+
+            if (beforeMatch && afterMatch && beforeRange) {
+              setTarget(beforeRange)
+              setSearch(beforeMatch[1])
+              setIndex(0)
+              return
+            }
+          }
+
+          setTarget(null)
         }}
       >
         <Editable
           autoFocus
           className="h-full"
           placeholder=">"
-          renderLeaf={renderLeaf}
-          onKeyDown={event => {
-            if (event.key === 'Enter') {
-              event.preventDefault()
-              enter()
-            }
-          }}
+          onKeyDown={onKeyDown}
+          renderElement={renderElement}
         />
+        {target && chars.length > 0 && (
+          <Portal>
+            <div
+              ref={suggestionRef}
+              style={{
+                top: '-9999px',
+                left: '-9999px',
+                position: 'absolute',
+                zIndex: 1,
+                background: 'black',
+              }}
+              className="border border-gray-500"
+            >
+              {chars.map((char, i) => (
+                <div
+                  key={char}
+                  className="px-1"
+                  style={{
+                    background: i === index ? 'white' : 'transparent',
+                    color: i === index ? 'black' : 'white',
+                  }}
+                >
+                  {char}
+                </div>
+              ))}
+            </div>
+          </Portal>
+        )}
       </Slate>
     </div>
   )
 }
 
-const Leaf = (props: any) => {
+const Element = (props: RenderElementProps) => {
+  const { attributes, children, element } = props
+  switch (element.type) {
+    case 'suggestion':
+      return <SuggestionElement {...props} />
+    default:
+      return <p {...attributes}>{children}</p>
+  }
+}
+
+const SuggestionElement = ({ attributes, children, element }: any) => {
   return (
     <span
-      {...props.attributes}
-      style={{ color: props.leaf.command ? 'red' : 'white' }}
+      {...attributes}
+      contentEditable={false}
+      className="inline-block font-bold"
     >
-      {props.children}
+      @{element.character}
+      {children}
     </span>
   )
 }
 
-const withSyntaxHighlighting = (editor: ReactEditor) => {
-  const { insertText } = editor
+const withSuggestions = (editor: ReactEditor) => {
+  const { isInline, isVoid } = editor
 
-  editor.insertText = text => {
-    const { selection } = editor
+  editor.isInline = element => {
+    return element.type === 'suggestion' ? true : isInline(element)
+  }
 
-    if (text === ' ' && selection && Range.isCollapsed(selection)) {
-      const { anchor } = selection
-      const block = Editor.above(editor, {
-        match: n => Editor.isBlock(editor, n),
-      })
-      const path = block ? block[1] : []
-      const start = Editor.start(editor, path)
-      const range = { anchor, focus: start }
-      const beforeText = Editor.string(editor, range)
-
-      // todo: check if actually a command
-      const type = !!beforeText
-
-      if (type) {
-        Transforms.insertText(editor, ' ')
-        Transforms.setNodes(
-          editor,
-          { command: true },
-          { at: range, match: n => Text.isText(n), split: true },
-        )
-        return
-      }
-    }
-
-    insertText(text)
+  editor.isVoid = element => {
+    return element.type === 'suggestion' ? true : isVoid(element)
   }
 
   return editor
+}
+
+const insertSuggestion = (editor: ReactEditor, character: string) => {
+  const suggestion = { type: 'suggestion', character, children: [{ text: '' }] }
+  Transforms.insertNodes(editor, suggestion)
+  Transforms.move(editor)
 }
 
 export default Input

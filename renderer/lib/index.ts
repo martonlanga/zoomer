@@ -16,3 +16,8 @@ export const writeFile = (path: string, content: string) => {
 export const getLanguage = (path: string): string | undefined => {
   return ipc.sendSync('getLanguage', path)
 }
+
+export const getCommands = (): string[] => {
+  const cmds = ipc.sendSync('getCommands')
+  return cmds.split(/\s+/)
+}

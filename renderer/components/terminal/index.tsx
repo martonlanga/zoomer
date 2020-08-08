@@ -10,9 +10,6 @@ const Terminal = () => {
   )
 
   useEffect(() => {
-    const cmds = ipc.sendSync('getCommands')
-    // console.log(cmds.split(/\s+/))
-
     const listener = (event: any, data: any) => {
       termOutput(data)
     }

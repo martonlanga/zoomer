@@ -52,6 +52,7 @@
     "react-portal": "^4.2.1",
     "react-use": "^15.3.3",
     "slate": "^0.58.4",
+    "slate-history": "^0.58.4",
     "slate-react": "^0.58.4",
     "tailwindcss": "^1.5.1",
     "uuid": "^8.3.0",
