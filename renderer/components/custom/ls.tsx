@@ -71,21 +71,29 @@ const Tab = React.forwardRef<
         }}
         onBlur={() => setFocused(false)}
         tabIndex={0}
+        className="border border-gray-500 focus:outline-none focus:border-gray-200 w-48 p-1 overflow-y-auto"
+        style={{ maxHeight: '15rem' }}
       >
         {files.map((file, i) => (
           <div
             key={file.path}
+            className="text-blue-600"
             style={{
               background:
-                focused && selectedIndex === i ? 'red' : 'transparent',
-              color: file.isDir ? 'blue' : 'white',
+                focused && selectedIndex === i ? 'white' : 'transparent',
+              color:
+                focused && selectedIndex === i
+                  ? 'black'
+                  : file.isDir
+                  ? undefined // default to sexy classname blue
+                  : 'white',
             }}
           >
             {file.name}
           </div>
         ))}
       </div>
-      {selected?.isDir && getFiles(selected.path).length && (
+      {selected?.isDir && getFiles(selected.path).length > 0 && (
         <Tab
           dir={selected.path}
           ref={nextTabRef}

@@ -32,10 +32,12 @@ const Terminal = () => {
     <div className="overflow-x-hidden text-white h-screen flex flex-col bg-black">
       <ul className="px-8 py-3">
         {history.map(({ id, input, currentDir, type, out }, i) => (
-          <li key={id} className="flex flex-col">
+          <li key={id} className="flex flex-col space-y-3">
             <p>
-              <span className="text-blue-300 mr-4">{currentDir}</span>
-              {input}
+              <span className="text-gray-600 mr-4">
+                ~{currentDir.substr(18)}
+              </span>
+              <span className="text-gray-400 font-bold">{input}</span>
             </p>
             {out && type === 'fallback' ? (
               <div id={`term-${id}`} />
