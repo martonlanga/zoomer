@@ -52,15 +52,7 @@ const Terminal = () => {
   }, [history])
 
   return (
-    <div
-      className="overflow-x-hidden text-white h-screen flex flex-col bg-black"
-      onClick={() => {
-        const input = getInput()
-        // if (input) {
-        //   input.focus()
-        // }
-      }}
-    >
+    <div className="overflow-x-hidden text-white h-screen flex flex-col bg-black">
       <ul className="px-8 py-3">
         {history.map(({ id, input, currentDir, type, out }, i) => (
           <li key={id} className="flex flex-col">

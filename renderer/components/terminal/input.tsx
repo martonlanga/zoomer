@@ -56,7 +56,7 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
   return (
     <div
       id="input"
-      className="px-8 py-3 focus:outline-none w-full"
+      className="px-8 py-3 focus:outline-none w-full h-full"
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
     >
@@ -67,6 +67,7 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
       >
         <Editable
           autoFocus
+          className="h-full"
           placeholder=">"
           renderLeaf={renderLeaf}
           onKeyDown={event => {
