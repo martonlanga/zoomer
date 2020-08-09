@@ -76,6 +76,7 @@ const Tab = React.forwardRef<
         {files.map((file, i) => (
           <div
             key={file.path}
+            onClick={() => setSelectedIndex(i)}
             className="text-blue-600"
             style={{
               background:
