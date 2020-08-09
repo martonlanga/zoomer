@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useKey } from 'react-use'
 import { FileEntry } from '../../../electron-src/interfaces'
 import { getFiles } from '../../lib'
+import { getInput } from '../terminal/input'
 
 interface Props {
   currentDir: string
@@ -14,6 +15,9 @@ const Ls = ({ currentDir }: Props) => {
       firstTabRef.current.focus()
     }
   }, [])
+
+  useKey('Escape', () => getInput()?.focus(), {}, [getInput])
+
   return (
     <div className="flex space-x-3">
       <Tab dir={currentDir} ref={firstTabRef} />
