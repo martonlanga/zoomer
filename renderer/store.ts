@@ -4,6 +4,8 @@ import { Command } from '../electron-src/interfaces'
 import resolveOutput from './lib/resolve-output'
 import path from 'path'
 
+const DEFAULT_PATH = '/Users/martonlanga'
+
 interface Store {
   history: Command[]
   add: (inputCommand: Omit<Command, 'out'>) => void
@@ -43,7 +45,7 @@ const [useStore] = create<Store>((set, get) => {
       set({ history: newHistory })
     },
     clear: () => set({ history: [] }),
-    currentDir: '/Users/martonlanga/code/extensions/countdown',
+    currentDir: DEFAULT_PATH,
     setCurrentDir: cd =>
       set({ currentDir: path.resolve(get().currentDir, cd) }),
   } as Store
