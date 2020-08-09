@@ -1,0 +1,6 @@
+{
+  "css.validate": false,
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  }
+}

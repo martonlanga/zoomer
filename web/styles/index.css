@@ -1,0 +1,22 @@
+@tailwind base;
+
+/* Write your own custom base styles here */
+
+/* Start purging... */
+@tailwind components;
+/* Stop purging. */
+
+/* Write you own custom component styles here */
+a:hover {
+  @apply underline;
+}
+
+/* Start purging... */
+@tailwind utilities;
+/* Stop purging. */
+
+/* Your own custom utilities */
+
+body {
+  @apply font-mono bg-black text-white max-w-3xl mx-auto p-2;
+}

@@ -4,7 +4,7 @@ import create from 'zustand'
 import { Command } from '../electron-src/interfaces'
 import resolveOutput from './lib/resolve-output'
 
-const DEFAULT_PATH = '/Users/martonlanga'
+const DEFAULT_PATH = '/Users/martonlanga/'
 
 interface Store {
   history: Command[]

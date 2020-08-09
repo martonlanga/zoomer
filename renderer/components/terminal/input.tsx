@@ -110,7 +110,6 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
   const argChars = useMemo(() => getParsedManPage(inputCommand).slice(0, 10), [
     inputCommand,
   ])
-  console.log('parsed', argChars)
 
   const onKeyDown = useCallback(
     event => {
@@ -147,6 +146,7 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
           if (!input) return
           const command = { id: uuidv4(), input, currentDir }
           const cmd = input.split(' ')[0]
+
           if (PLUGIN_NAMES.includes(cmd)) {
             const plugin = PLUGINS.find(plugin => plugin.name === cmd)
             if (plugin) {
@@ -184,8 +184,6 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
       argSearch,
     ],
   )
-
-  console.log(value)
 
   useEffect(() => {
     if (target && chars.length > 0 && suggestionRef.current) {
@@ -236,7 +234,7 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
               const beforeRange = before && Editor.range(editor, before, start)
               const beforeText =
                 beforeRange && Editor.string(editor, beforeRange)
-              const beforeMatch = beforeText && beforeText.match(/^\/(\w+)$/)
+              const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/)
               const after = Editor.after(editor, start)
               const afterRange = Editor.range(editor, start, after)
               const afterText = Editor.string(editor, afterRange)
@@ -257,13 +255,13 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
               const beforeRange = before && Editor.range(editor, before, start)
               const beforeText =
                 beforeRange && Editor.string(editor, beforeRange)
-              const beforeMatch = beforeText && beforeText.match(/-(\w+)/)
+              const beforeMatch = beforeText && beforeText.match(/$(\w+)/)
               const after = Editor.after(editor, start)
               const afterRange = Editor.range(editor, start, after)
               const afterText = Editor.string(editor, afterRange)
               const afterMatch = afterText.match(/^(\s|$)/)
 
-              console.log(beforeMatch, afterMatch, beforeRange)
+              // console.log(beforeMatch, afterMatch, beforeRange)
 
               if (beforeMatch && afterMatch && beforeRange) {
                 setTarget(beforeRange)
