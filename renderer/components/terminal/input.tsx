@@ -177,9 +177,9 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
   }, [chars.length, editor, index, search, target])
 
   return (
-    <div className="px-8 py-4 focus:outline-none w-full h-full border-t border-gray-800">
-      <div className="py-1 text-sm">
-        <span className="text-blue-400 font-bold">{stat.name}</span>
+    <>
+      <div className="px-8 py-1 text-sm mt-10">
+        <span className="text-blue-400 font-bold underline">{stat.name}</span>
         {stat.gitBranch && (
           <>
             {' '}
@@ -187,79 +187,82 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
           </>
         )}
       </div>
-      <Slate
-        editor={editor}
-        value={value}
-        onChange={newValue => {
-          if (isFocused) {
-            setValue(newValue)
-          }
-
-          const { selection } = editor
-
-          if (selection && Range.isCollapsed(selection)) {
-            const [start] = Range.edges(selection)
-            const wordBefore = Editor.before(editor, start, { unit: 'word' })
-            const before = wordBefore && Editor.before(editor, wordBefore)
-            const beforeRange = before && Editor.range(editor, before, start)
-            const beforeText = beforeRange && Editor.string(editor, beforeRange)
-            const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/)
-            const after = Editor.after(editor, start)
-            const afterRange = Editor.range(editor, start, after)
-            const afterText = Editor.string(editor, afterRange)
-            const afterMatch = afterText.match(/^(\s|$)/)
-
-            if (beforeMatch && afterMatch && beforeRange) {
-              setTarget(beforeRange)
-              setSearch(beforeMatch[1])
-              setIndex(0)
-              return
+      <div className="px-8 py-3 w-full h-full">
+        <Slate
+          editor={editor}
+          value={value}
+          onChange={newValue => {
+            if (isFocused) {
+              setValue(newValue)
             }
-          }
 
-          setTarget(null)
-        }}
-      >
-        <Editable
-          autoFocus
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          id="input"
-          className="h-full"
-          placeholder=">"
-          onKeyDown={onKeyDown}
-          renderElement={renderElement}
-        />
-        {target && chars.length > 0 && (
-          <Portal>
-            <div
-              ref={suggestionRef}
-              style={{
-                top: '-9999px',
-                left: '-9999px',
-                position: 'absolute',
-                zIndex: 1,
-                background: 'black',
-              }}
-              className="border border-gray-500"
-            >
-              {chars.map((char, i) => (
-                <div
-                  key={char}
-                  className="px-1"
-                  style={{
-                    background: i === index ? 'white' : 'transparent',
-                    color: i === index ? 'black' : 'white',
-                  }}
-                >
-                  {char}
-                </div>
-              ))}
-            </div>
-          </Portal>
-        )}
-      </Slate>
-    </div>
+            const { selection } = editor
+
+            if (selection && Range.isCollapsed(selection)) {
+              const [start] = Range.edges(selection)
+              const wordBefore = Editor.before(editor, start, { unit: 'word' })
+              const before = wordBefore && Editor.before(editor, wordBefore)
+              const beforeRange = before && Editor.range(editor, before, start)
+              const beforeText =
+                beforeRange && Editor.string(editor, beforeRange)
+              const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/)
+              const after = Editor.after(editor, start)
+              const afterRange = Editor.range(editor, start, after)
+              const afterText = Editor.string(editor, afterRange)
+              const afterMatch = afterText.match(/^(\s|$)/)
+
+              if (beforeMatch && afterMatch && beforeRange) {
+                setTarget(beforeRange)
+                setSearch(beforeMatch[1])
+                setIndex(0)
+                return
+              }
+            }
+
+            setTarget(null)
+          }}
+        >
+          <Editable
+            autoFocus
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            id="input"
+            className="h-full"
+            placeholder=">"
+            onKeyDown={onKeyDown}
+            renderElement={renderElement}
+          />
+          {target && chars.length > 0 && (
+            <Portal>
+              <div
+                ref={suggestionRef}
+                style={{
+                  top: '-9999px',
+                  left: '-9999px',
+                  position: 'absolute',
+                  zIndex: 1,
+                  background: 'black',
+                }}
+                className="border border-gray-500"
+              >
+                {chars.map((char, i) => (
+                  <div
+                    key={char}
+                    className="px-1"
+                    style={{
+                      background: i === index ? 'white' : 'transparent',
+                      color: i === index ? 'black' : 'white',
+                    }}
+                  >
+                    {char}
+                  </div>
+                ))}
+              </div>
+            </Portal>
+          )}
+        </Slate>
+      </div>
+    </>
   )
 }
 
