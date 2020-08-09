@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 body {
-  @apply overflow-hidden bg-transparent relative;
+  @apply overflow-hidden bg-transparent relative font-mono;
 }
 
 ::selection {
-  background: #db4b7d80;
+  @apply bg-blue-500;
 }
