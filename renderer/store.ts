@@ -27,17 +27,25 @@ const [useStore] = create<Store>((set, get) => {
     },
     termOutput: data => {
       const { history } = get()
-      console.log('l', history.length)
 
       const last = { ...history[history.length - 1] }
       if (last.term) {
         last.term.write(data)
       } else {
         const el = document.querySelector(`#term-${last.id}`) as HTMLElement
+
         if (el) {
-          last.term = new Terminal()
-          last.term.open(el)
-          last.term.write(data)
+          const term = new Terminal()
+          term.open(el)
+          term.write(data)
+          term.onKey(({ key }) => {
+            if (key.charCodeAt(0) == 13) {
+              term.write('\n')
+            }
+            last.term?.write(key)
+          })
+          el.focus()
+          last.term = term
         }
       }
       if (typeof last.out === 'undefined') {
