@@ -11,12 +11,20 @@ export default function Nav() {
         </li>
         <ul className="flex justify-between items-center space-x-4">
           <li>
-            <a href={'href'} className="">
+            <a
+              href="https://forms.gle/pEg6CyJzUjGc88K89"
+              target="_blank"
+              className=""
+            >
               Discord
             </a>
           </li>
           <li>
-            <a href={'href'} className="bg-white text-black p-2">
+            <a
+              href="https://forms.gle/pEg6CyJzUjGc88K89"
+              target="_blank"
+              className="bg-white text-black p-2"
+            >
               Sign up
             </a>
           </li>
