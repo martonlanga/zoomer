@@ -51,11 +51,22 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
   ])
 
   useEffect(() => {
-    if (historyIndex > -1 && history[historyIndex]) {
+    if (
+      historyIndex >= 0 &&
+      historyIndex < history.length &&
+      history[historyIndex]
+    ) {
       setValue([
         {
           type: 'paragraph',
           children: [{ text: history[historyIndex].input }],
+        },
+      ])
+    } else if (historyIndex === history.length) {
+      setValue([
+        {
+          type: 'paragraph',
+          children: [{ text: '' }],
         },
       ])
     }
@@ -69,11 +80,13 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
   )
   useKey(
     'ArrowDown',
-    () =>
-      historyIndex < history.length - 1 && setHistoryIndex(historyIndex + 1),
+    () => historyIndex < history.length && setHistoryIndex(historyIndex + 1),
     {},
     [historyIndex, history],
   )
+
+  console.log('hIndex', historyIndex)
+  console.log('hlength', history.length)
 
   const [target, setTarget] = useState<null | Range>(null)
   const [index, setIndex] = useState(0)
@@ -117,6 +130,7 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
         }
       } else {
         if (event.key === 'Enter') {
+          setHistoryIndex(history.length + 1)
           event.preventDefault()
           const input = value.map(n => Node.string(n)).join('\n')
           if (!input) return
@@ -137,10 +151,14 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
           if (cmd === 'cd') {
             setCurrentDir(input.split(' ')[1])
           }
-
+          setValue([
+            {
+              type: 'paragraph',
+              children: [{ text: '' }],
+            },
+          ])
           Editor.deleteBackward(editor, { unit: 'line' })
           ReactEditor.focus(editor)
-          getInput()?.focus()
         }
       }
     },
