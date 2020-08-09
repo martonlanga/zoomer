@@ -22,7 +22,7 @@ const Terminal = () => {
     if (input) {
       input.scrollIntoView({ behavior: 'smooth' })
     }
-    console.log('history', history)
+    // console.log('history', history)
   }, [history])
 
   return (
@@ -32,11 +32,14 @@ const Terminal = () => {
           <li key={id} className="flex flex-col space-y-3">
             <p>
               <span className="text-gray-600 mr-4">
-                ~{currentDir.substr(18)}
+                ~
+                {
+                  currentDir.substr(18) // todo: fix dis
+                }
               </span>
               <span className="text-gray-100 font-bold">{input}</span>
             </p>
-            {out && type === 'fallback' ? (
+            {type === 'fallback' ? (
               <div id={`term-${id}`} />
             ) : (
               <section className="text-gray-500">{out}</section>

@@ -1,8 +1,8 @@
+import path from 'path'
 import { Terminal } from 'xterm'
 import create from 'zustand'
 import { Command } from '../electron-src/interfaces'
 import resolveOutput from './lib/resolve-output'
-import path from 'path'
 
 const DEFAULT_PATH = '/Users/martonlanga'
 
@@ -20,12 +20,15 @@ const [useStore] = create<Store>((set, get) => {
     history: [],
     add: inputCommand => {
       const command = resolveOutput(inputCommand)
-      set(({ history }) => ({
-        history: history ? [...history, command] : [command],
+
+      set(() => ({
+        history: [...get().history, command],
       }))
     },
     termOutput: data => {
       const { history } = get()
+      console.log('l', history.length)
+
       const last = { ...history[history.length - 1] }
       if (last.term) {
         last.term.write(data)
@@ -41,7 +44,7 @@ const [useStore] = create<Store>((set, get) => {
         last.out = ''
       }
       last.out += data
-      const newHistory = [...history.slice(0, history.length - 2), last]
+      const newHistory = [...history.slice(0, history.length - 1), last]
       set({ history: newHistory })
     },
     clear: () => set({ history: [] }),
