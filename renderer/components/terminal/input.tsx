@@ -12,7 +12,7 @@ import {
 } from 'slate-react'
 import { v4 as uuidv4 } from 'uuid'
 import { CUSTOM_COMMAND } from '../../../electron-src/interfaces'
-import { getCommands, getCurrentDirStat } from '../../lib'
+import { getCommands, getCurrentDirStat, getParsedManPage } from '../../lib'
 import PLUGINS from '../../lib/plugins'
 import useStore from '../../store'
 
@@ -92,6 +92,7 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
   const [target, setTarget] = useState<null | Range>(null)
   const [index, setIndex] = useState(0)
   const [search, setSearch] = useState('')
+  const [argSearch, setArgSearch] = useState('')
   const suggestionRef = useRef<HTMLDivElement>(null)
   const renderElement = useCallback(props => <Element {...props} />, [])
 
@@ -102,6 +103,14 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
         .slice(0, 10),
     ),
   ]
+  const inputCommand = value
+    .map(n => Node.string(n))
+    .join('\n')
+    .split(' ')[0]
+  const argChars = useMemo(() => getParsedManPage(inputCommand).slice(0, 10), [
+    inputCommand,
+  ])
+  console.log('parsed', argChars)
 
   const onKeyDown = useCallback(
     event => {
@@ -134,6 +143,7 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
           setHistoryIndex(history.length + 1)
           event.preventDefault()
           const input = value.map(n => Node.string(n)).join('\n')
+
           if (!input) return
           const command = { id: uuidv4(), input, currentDir }
           const cmd = input.split(' ')[0]
@@ -163,8 +173,19 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
         }
       }
     },
-    [index, search, target, value, CUSTOM_COMMANDS, currentDir, editor],
+    [
+      index,
+      search,
+      target,
+      value,
+      CUSTOM_COMMANDS,
+      currentDir,
+      editor,
+      argSearch,
+    ],
   )
+
+  console.log(value)
 
   useEffect(() => {
     if (target && chars.length > 0 && suggestionRef.current) {
@@ -175,6 +196,16 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
       el.style.left = `${rect.left + window.pageXOffset}px`
     }
   }, [chars.length, editor, index, search, target])
+
+  useEffect(() => {
+    if (target && argChars.length > 0 && suggestionRef.current) {
+      const el = suggestionRef.current
+      const domRange = ReactEditor.toDOMRange(editor, target)
+      const rect = domRange.getBoundingClientRect()
+      el.style.top = `${rect.top + window.pageYOffset + 24}px`
+      el.style.left = `${rect.left + window.pageXOffset}px`
+    }
+  }, [argChars.length, editor, index, argSearch, target])
 
   return (
     <>
@@ -205,7 +236,7 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
               const beforeRange = before && Editor.range(editor, before, start)
               const beforeText =
                 beforeRange && Editor.string(editor, beforeRange)
-              const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/)
+              const beforeMatch = beforeText && beforeText.match(/^\/(\w+)$/)
               const after = Editor.after(editor, start)
               const afterRange = Editor.range(editor, start, after)
               const afterText = Editor.string(editor, afterRange)
@@ -214,6 +245,29 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
               if (beforeMatch && afterMatch && beforeRange) {
                 setTarget(beforeRange)
                 setSearch(beforeMatch[1])
+                setIndex(0)
+                return
+              }
+            }
+
+            if (selection && Range.isCollapsed(selection)) {
+              const [start] = Range.edges(selection)
+              const wordBefore = Editor.before(editor, start, { unit: 'word' })
+              const before = wordBefore && Editor.before(editor, wordBefore)
+              const beforeRange = before && Editor.range(editor, before, start)
+              const beforeText =
+                beforeRange && Editor.string(editor, beforeRange)
+              const beforeMatch = beforeText && beforeText.match(/-(\w+)/)
+              const after = Editor.after(editor, start)
+              const afterRange = Editor.range(editor, start, after)
+              const afterText = Editor.string(editor, afterRange)
+              const afterMatch = afterText.match(/^(\s|$)/)
+
+              console.log(beforeMatch, afterMatch, beforeRange)
+
+              if (beforeMatch && afterMatch && beforeRange) {
+                setTarget(beforeRange)
+                setArgSearch(beforeMatch[1])
                 setIndex(0)
                 return
               }
@@ -260,6 +314,34 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
               </div>
             </Portal>
           )}
+          {target && argChars.length > 0 && (
+            <Portal>
+              <div
+                ref={suggestionRef}
+                style={{
+                  top: '-9999px',
+                  left: '-9999px',
+                  position: 'absolute',
+                  zIndex: 1,
+                  background: 'black',
+                }}
+                className="border border-gray-500"
+              >
+                {argChars.map((char, i) => (
+                  <div
+                    key={char.label}
+                    className="px-1"
+                    style={{
+                      background: i === index ? 'white' : 'transparent',
+                      color: i === index ? 'black' : 'white',
+                    }}
+                  >
+                    {char.label} ° {char.detail}
+                  </div>
+                ))}
+              </div>
+            </Portal>
+          )}
         </Slate>
       </div>
     </>
@@ -283,7 +365,7 @@ const SuggestionElement = ({ attributes, children, element }: any) => {
       contentEditable={false}
       className="inline-block font-bold"
     >
-      @{element.character}
+      {element.character}
       {children}
     </span>
   )
@@ -304,7 +386,11 @@ const withSuggestions = (editor: ReactEditor) => {
 }
 
 const insertSuggestion = (editor: ReactEditor, character: string) => {
-  const suggestion = { type: 'suggestion', character, children: [{ text: '' }] }
+  const suggestion = {
+    type: 'suggestion',
+    character,
+    children: [{ text: character }],
+  }
   Transforms.insertNodes(editor, suggestion)
   Transforms.move(editor)
 }

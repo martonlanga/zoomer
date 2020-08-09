@@ -42,7 +42,7 @@ const [useStore] = create<Store>((set, get) => {
             if (key.charCodeAt(0) == 13) {
               term.write('\n')
             }
-            last.term?.write(key)
+            term.write(key)
           })
           el.focus()
           last.term = term

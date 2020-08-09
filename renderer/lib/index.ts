@@ -1,3 +1,4 @@
+import { Suggestion } from './../../electron-src/parse-man-pages'
 import { FileEntry, CurrentDirStat } from './../../electron-src/interfaces'
 import ipc from './ipc'
 
@@ -24,4 +25,9 @@ export const getCommands = (): string[] => {
 
 export const getCurrentDirStat = (currentDir: string): CurrentDirStat => {
   return ipc.sendSync('getCurrentDirStat', currentDir)
+}
+
+export const getParsedManPage = (cmd: string): Suggestion[] => {
+  const parsedManPage = ipc.sendSync('getParsedManPage', cmd)
+  return parsedManPage ? parsedManPage : []
 }

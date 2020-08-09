@@ -10,6 +10,7 @@ import path from 'path'
 import createWindow from './create-window'
 import { Command, CurrentDirStat, FileEntry, InputCommand } from './interfaces'
 import createPty from './pty'
+import manPageOptions from './parse-man-pages'
 
 let terminalWindow: BrowserWindow | null = null
 
@@ -101,6 +102,16 @@ ipcMain.on('getCurrentDirStat', (event: IpcMainEvent, currentDir: string) => {
       gitBranch: branch ? branch : undefined,
     } as CurrentDirStat
   } catch (e) {
+    event.returnValue = null
+  }
+})
+
+ipcMain.on('getParsedManPage', async (event: IpcMainEvent, cmd: string) => {
+  try {
+    event.returnValue = await manPageOptions(cmd)
+  } catch (e) {
+    console.error(e)
+
     event.returnValue = null
   }
 })
