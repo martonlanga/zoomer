@@ -4,10 +4,7 @@ import useStore from '../../store'
 import Input, { getInput } from './input'
 
 const Terminal = () => {
-  const { history, termOutput } = useStore()
-  const [currentDir, setCurrentDir] = useState(
-    '/Users/martonlanga/code/extensions/countdown',
-  )
+  const { history, termOutput, currentDir, setCurrentDir } = useStore()
 
   useEffect(() => {
     const listener = (event: any, data: any) => {

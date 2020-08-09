@@ -1,22 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Portal } from 'react-portal'
 import { useKey } from 'react-use'
-import { createEditor, Editor, Node, Range, Text, Transforms } from 'slate'
+import { createEditor, Editor, Node, Range, Transforms } from 'slate'
+import { withHistory } from 'slate-history'
 import {
   Editable,
   ReactEditor,
+  RenderElementProps,
   Slate,
   withReact,
-  useSelected,
-  useFocused,
-  RenderElementProps,
 } from 'slate-react'
 import { v4 as uuidv4 } from 'uuid'
 import { CUSTOM_COMMAND } from '../../../electron-src/interfaces'
-import useStore from '../../store'
 import { getCommands } from '../../lib'
-import { withHistory } from 'slate-history'
 import PLUGINS from '../../lib/plugins'
+import useStore from '../../store'
 
 export const getInput = (): HTMLDivElement | null => {
   const input = document.querySelector<HTMLDivElement>('#input')
@@ -28,7 +26,7 @@ export const getInput = (): HTMLDivElement | null => {
 
 const PLUGIN_NAMES = PLUGINS.map(({ name }) => name)
 
-const CUSTOM_COMMANDS: CUSTOM_COMMAND[] = ['ls', 'edit', 'iframe']
+const CUSTOM_COMMANDS: CUSTOM_COMMAND[] = ['ls', 'edit', 'iframe', 'cd']
 
 const COMMANDS = [...getCommands(), ...CUSTOM_COMMANDS, ...PLUGIN_NAMES]
 
@@ -39,7 +37,10 @@ interface Props {
 
 const Input = ({ currentDir, setCurrentDir }: Props) => {
   const { add, history } = useStore()
-  const editor = useMemo(() => withSuggestions(withReact(createEditor())), [])
+  const editor = useMemo(
+    () => withSuggestions(withHistory(withReact(createEditor()))),
+    [],
+  )
   const [isFocused, setIsFocused] = useState(true)
   const [historyIndex, setHistoryIndex] = useState(history.length)
   const [value, setValue] = useState<Node[]>([
@@ -51,12 +52,12 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
 
   useEffect(() => {
     if (historyIndex > -1 && history[historyIndex]) {
-      // setValue([
-      //   {
-      //     type: 'paragraph',
-      //     children: [{ text: history[historyIndex].input }],
-      //   },
-      // ])
+      setValue([
+        {
+          type: 'paragraph',
+          children: [{ text: history[historyIndex].input }],
+        },
+      ])
     }
   }, [historyIndex, history])
 
@@ -131,6 +132,10 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
             add({ ...command, type: 'custom' })
           } else {
             add({ ...command, type: 'fallback' })
+          }
+
+          if (cmd === 'cd') {
+            setCurrentDir(input.split(' ')[1])
           }
 
           Editor.deleteBackward(editor, { unit: 'line' })

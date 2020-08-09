@@ -17,6 +17,9 @@ const resolveOutput = (inputCommand: Omit<Command, 'out'>): Command => {
     const command = input.split(' ')[0]
 
     switch (command) {
+      case 'cd':
+        out = null
+        break
       case 'ls':
         if (input.includes('--json')) {
           const commands = input.split(' | ')
