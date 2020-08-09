@@ -8,13 +8,24 @@ export default function IndexPage() {
       <Nav />
       <Head>
         <title>Zoomer | The Tesla of Terminals</title>
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
       </Head>
       <div className="py-10 space-y-10">
         <h1 className="text-center text-2xl font-bold">
           The Tesla of Terminals
         </h1>
-
-        <video className="w-full border border-white"></video>
+        <img src="/demo.gif" className="w-full border border-white" />
         <ul className="grid grid-cols-2 gap-8">
           <li>
             <h3 className="font-bold">Web based</h3>
