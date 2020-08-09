@@ -17,3 +17,7 @@ export interface FileEntry {
   path: string
   isDir: boolean
 }
+
+export interface CurrentDirStat extends FileEntry {
+  gitBranch?: string
+}

@@ -1,19 +1,15 @@
 import * as fsScandir from '@nodelib/fs.scandir'
-import fs from 'fs'
 import { exec } from 'child_process'
-import {
-  app,
-  BrowserWindow,
-  globalShortcut,
-  ipcMain,
-  IpcMainEvent,
-} from 'electron'
+import branchName from 'current-git-branch'
+import { app, BrowserWindow, ipcMain, IpcMainEvent } from 'electron'
 import prepareNext from 'electron-next'
-import createWindow from './create-window'
-import { Command, FileEntry, InputCommand } from './interfaces'
-import createPty from './pty'
+import fs from 'fs'
 import langDetector from 'language-detect'
 import langMapper from 'language-map'
+import path from 'path'
+import createWindow from './create-window'
+import { Command, CurrentDirStat, FileEntry, InputCommand } from './interfaces'
+import createPty from './pty'
 
 let terminalWindow: BrowserWindow | null = null
 
@@ -92,5 +88,19 @@ ipcMain.on('getLanguage', (event: IpcMainEvent, path: string) => {
     event.returnValue = langMapper[langDetector.sync(path)].aceMode
   } catch (e) {
     event.returnValue = undefined
+  }
+})
+
+ipcMain.on('getCurrentDirStat', (event: IpcMainEvent, currentDir: string) => {
+  try {
+    const branch = branchName({ altPath: currentDir })
+    event.returnValue = {
+      isDir: fs.lstatSync(currentDir).isDirectory(),
+      name: path.basename(currentDir),
+      path: currentDir,
+      gitBranch: branch ? branch : undefined,
+    } as CurrentDirStat
+  } catch (e) {
+    event.returnValue = null
   }
 })

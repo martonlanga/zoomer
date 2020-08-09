@@ -16,7 +16,14 @@ const Ls = ({ currentDir }: Props) => {
     }
   }, [])
 
-  useKey('Escape', () => getInput()?.focus(), {}, [getInput])
+  useKey(
+    'Escape',
+    () => {
+      getInput()?.focus()
+    },
+    {},
+    [getInput],
+  )
 
   return (
     <div className="flex space-x-3">

@@ -1,4 +1,4 @@
-import { FileEntry } from './../../electron-src/interfaces'
+import { FileEntry, CurrentDirStat } from './../../electron-src/interfaces'
 import ipc from './ipc'
 
 export const getFiles = (dir: string): FileEntry[] => {
@@ -20,4 +20,8 @@ export const getLanguage = (path: string): string | undefined => {
 export const getCommands = (): string[] => {
   const cmds = ipc.sendSync('getCommands')
   return cmds.split(/\s+/)
+}
+
+export const getCurrentDirStat = (currentDir: string): CurrentDirStat => {
+  return ipc.sendSync('getCurrentDirStat', currentDir)
 }

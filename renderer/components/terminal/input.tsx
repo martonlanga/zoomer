@@ -12,14 +12,14 @@ import {
 } from 'slate-react'
 import { v4 as uuidv4 } from 'uuid'
 import { CUSTOM_COMMAND } from '../../../electron-src/interfaces'
-import { getCommands } from '../../lib'
+import { getCommands, getCurrentDirStat } from '../../lib'
 import PLUGINS from '../../lib/plugins'
 import useStore from '../../store'
 
 export const getInput = (): HTMLDivElement | null => {
   const input = document.querySelector<HTMLDivElement>('#input')
-  if (input && input.children[0]) {
-    return input.childNodes[0] as HTMLDivElement
+  if (input) {
+    return input as HTMLDivElement
   }
   return null
 }
@@ -49,6 +49,7 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
       children: [{ text: '' }],
     },
   ])
+  const stat = useMemo(() => getCurrentDirStat(currentDir), [currentDir])
 
   useEffect(() => {
     if (
@@ -74,19 +75,19 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
 
   useKey(
     'ArrowUp',
-    () => historyIndex > 0 && setHistoryIndex(historyIndex - 1),
+    () => isFocused && historyIndex > 0 && setHistoryIndex(historyIndex - 1),
     {},
-    [historyIndex, history],
+    [isFocused, historyIndex, history],
   )
   useKey(
     'ArrowDown',
-    () => historyIndex < history.length && setHistoryIndex(historyIndex + 1),
+    () =>
+      isFocused &&
+      historyIndex < history.length &&
+      setHistoryIndex(historyIndex + 1),
     {},
-    [historyIndex, history],
+    [isFocused, historyIndex, history],
   )
-
-  console.log('hIndex', historyIndex)
-  console.log('hlength', history.length)
 
   const [target, setTarget] = useState<null | Range>(null)
   const [index, setIndex] = useState(0)
@@ -176,12 +177,16 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
   }, [chars.length, editor, index, search, target])
 
   return (
-    <div
-      id="input"
-      className="px-8 py-4 focus:outline-none w-full h-full border-t border-gray-800"
-      onFocus={() => setIsFocused(true)}
-      onBlur={() => setIsFocused(false)}
-    >
+    <div className="px-8 py-4 focus:outline-none w-full h-full border-t border-gray-800">
+      <div className="py-1 text-sm">
+        <span className="text-blue-400 font-bold">{stat.name}</span>
+        {stat.gitBranch && (
+          <>
+            {' '}
+            on <span className="text-green-400">{stat.gitBranch}</span>
+          </>
+        )}
+      </div>
       <Slate
         editor={editor}
         value={value}
@@ -217,6 +222,9 @@ const Input = ({ currentDir, setCurrentDir }: Props) => {
       >
         <Editable
           autoFocus
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          id="input"
           className="h-full"
           placeholder=">"
           onKeyDown={onKeyDown}
